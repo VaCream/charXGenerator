@@ -5,13 +5,16 @@
 
 // Template 0: 자유 형식 - 마크다운만 정리
 const template0 = `<description>
-### [Character Name]
+### Character Name
 
-[Reorganize the original character information with minimal changes.
-Keep the original structure and content as much as possible.
-Only apply markdown formatting with headers starting at ### level.
-Use markdown elements to improve readability.
-Translate to English if the original is in another language.]
+Reorganize the original character information into a well-structured markdown format.
+Follow these guidelines:
+- Extract key information and organize them under appropriate ### headers
+- Convert prose/paragraph text into bullet points or structured lists
+- Group related information together under logical categories
+- Keep the original meaning and details intact while improving readability
+- Headers should start at ### level (do not use # or ##)
+- Translate to English if the original is in another language
 </description>`;
 
 // Template 1: BCS 폭탄 캐릭터 시트

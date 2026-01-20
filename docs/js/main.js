@@ -914,6 +914,59 @@ function initStatusWindowTab() {
             });
         }
     });
+
+    // 리사이저 드래그 기능
+    initStatusResizer();
+}
+
+function initStatusResizer() {
+    const resizeHandle = document.getElementById('status-resize-handle');
+    const statusSource = document.getElementById('status-source');
+    const previewContainer = document.getElementById('status-preview-container');
+
+    if (!resizeHandle || !statusSource || !previewContainer) return;
+
+    let isResizing = false;
+    let startY = 0;
+    let startSourceHeight = 0;
+    let startPreviewHeight = 0;
+
+    resizeHandle.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        startY = e.clientY;
+        startSourceHeight = statusSource.offsetHeight;
+        startPreviewHeight = previewContainer.offsetHeight;
+
+        document.body.style.cursor = 'ns-resize';
+        document.body.style.userSelect = 'none';
+
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+
+        const deltaY = e.clientY - startY;
+        const newSourceHeight = Math.max(100, startSourceHeight + deltaY);
+        const newPreviewHeight = Math.max(100, startPreviewHeight - deltaY);
+
+        statusSource.style.height = newSourceHeight + 'px';
+        previewContainer.style.height = newPreviewHeight + 'px';
+
+        // iframe도 함께 리사이즈
+        const iframe = previewContainer.querySelector('iframe');
+        if (iframe) {
+            iframe.style.height = newPreviewHeight + 'px';
+        }
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (isResizing) {
+            isResizing = false;
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+        }
+    });
 }
 
 async function generateStatusWindow() {
@@ -1060,6 +1113,21 @@ ${rendered}
     previewFrame.innerHTML = '';
     const iframe = document.createElement('iframe');
     iframe.srcdoc = fullHtml;
+
+    // iframe 로드 후 내용물 높이에 맞춰 자동 조절
+    iframe.onload = () => {
+        try {
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            const contentHeight = iframeDoc.body.scrollHeight;
+            // 최소 200px, 최대 600px 사이에서 조절
+            const newHeight = Math.min(Math.max(contentHeight + 40, 200), 600);
+            iframe.style.height = newHeight + 'px';
+            previewFrame.style.minHeight = newHeight + 'px';
+        } catch (e) {
+            console.log('Could not auto-resize iframe:', e);
+        }
+    };
+
     previewFrame.appendChild(iframe);
 
     showToast('미리보기가 업데이트되었습니다.');

@@ -60,16 +60,16 @@ I am organizing lorebooks for worldbuilding and characters in roleplay. Each lor
 - The <main_character> tag contains information about the main character for context.
 - {{user}} represents the user's persona, {{char}} represents the main character. Do NOT translate or replace them.
 
-### Title (<lore_title>)
+### Title (lore_title)
 Do NOT translate the title. Output it exactly as-is in the <result_title> tag.
 
-### Keywords (<lore_keywords>)
+### Keywords (lore_keywords)
 Translate the given keywords to English and output them alongside the original keywords.
 Original and translated keywords should be separated by commas as distinct keywords.
 Do NOT add new keywords or modify existing ones.
 If no keywords are provided, the entry is "always active" - skip keyword output.
 
-### Content (<lore_content>)
+### Content (lore_content)
 Rewrite the lorebook content in English.
 The result must start with \`### [English Title]\` - translate the title to English for this heading.
 Even if the original is not in markdown format, organize it using proper markdown structure.
@@ -94,16 +94,16 @@ I am organizing lorebooks for worldbuilding and characters in roleplay. Each lor
 - The <main_character> tag contains information about the main character for context.
 - {{user}} represents the user's persona, {{char}} represents the main character. Do NOT translate or replace them.
 
-### Title (<lore_title>)
+### Title (lore_title)
 Do NOT translate the title. Output it exactly as-is in the <result_title> tag.
 
-### Keywords (<lore_keywords>)
+### Keywords (lore_keywords)
 Translate the given keywords to English and output them alongside the original keywords.
 Original and translated keywords should be separated by commas as distinct keywords.
 Do NOT add new keywords or modify existing ones.
 If no keywords are provided, the entry is "always active" - skip keyword output.
 
-### Content (<lore_content>)
+### Content (lore_content)
 Rewrite the lorebook content in English.
 The result must start with \`### [English Title]\` - translate the title to English for this heading.
 Even if the original is not in markdown format, organize it using proper markdown structure.
@@ -181,7 +181,7 @@ Create a complete status window system based on the user's requirements.
 
 ## Output Format
 
-### AI Instruction (<status_instruction>)
+### Instruction (status_instruction)
 Instructions for when and how the AI should output status.
 - MUST start with \`### Status Window Guidelines\`
 - Explain each status variable and its meaning
@@ -190,13 +190,13 @@ Instructions for when and how the AI should output status.
 \`\`\`
 <status_instruction>
 ### Status Window Guidelines
-[When and how to output status]
+Output the status window at the end of every response.
 [Meaning of each status variable]
 [Output format example]
 </status_instruction>
 \`\`\`
 
-### Sample Output (<status_sample>)
+### Sample Output (status_sample)
 Example for preview testing. Must match the actual status output format. Write the sample values in Korean.
 
 \`\`\`
@@ -205,7 +205,7 @@ status[key1:sample_value1|key2:sample_value2|...]
 </status_sample>
 \`\`\`
 
-### Regex and HTML/CSS (<status_regex>)
+### Regex and HTML/CSS (status_regex)
 Used for RisuAI's regex script feature.
 
 \`\`\`
