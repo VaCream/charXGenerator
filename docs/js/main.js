@@ -1789,6 +1789,12 @@ function updateGuideHighlights() {
     // 설정 버튼: API 키가 저장되지 않았을 때
     toggleHighlight('btn-settings', !hasApiKey);
 
+    // API 키 미설정 툴팁 표시/숨김
+    const apiKeyTooltip = document.getElementById('api-key-tooltip');
+    if (apiKeyTooltip) {
+        apiKeyTooltip.classList.toggle('show', !hasApiKey && appState.settings.guideEnabled);
+    }
+
     // API 키 입력칸: API 키가 없을 때
     toggleHighlight('api-key', !hasApiKey);
 

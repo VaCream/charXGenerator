@@ -74,7 +74,7 @@
 플랫폼(Babe, Caveduck, Crack 등)의 캐릭터 정보를 복사하여 붙여넣어도 됩니다."></textarea>
                     </div>
                     <div class="panel-right">
-                        <div class="panel-title">생성된 디스크립션</div>
+                        <div class="panel-title">생성된 캐릭터 디스크립션</div>
                         <p class="panel-hint">LLM이 생성한 RisuAI용 디스크립션이 표시됩니다.</p>
                         <div class="textarea-wrapper" id="desc-result-wrapper">
                             <textarea id="result-text" class="textarea-large" readonly></textarea>
@@ -153,7 +153,7 @@
                 <div class="split-panel">
                     <div class="panel-left">
                         <div class="panel-title">상태창 설정</div>
-                        <p class="panel-hint">원하는 상태창 스타일을 설명해주세요.</p>
+                        <p class="panel-hint">상태창 스타일을 설명해주세요.</p>
                         <textarea id="status-source" class="textarea-medium" placeholder="원하는 상태창의 구성 요소를 입력해주세요. 
 특별히 원하는 스타일이나 디테일이 있다면 그것도 좋습니다.
 기존에 사용하던 상태창 지침이 있다면 그것을 넣어도 됩니다.
@@ -217,15 +217,15 @@
             <section class="tab-panel" id="panel-image">
                 <div class="image-container">
                     <div class="image-section">
-                        <div class="panel-title">대표 이미지</div>
-                        <div class="icon-area">
-                            <div class="icon-preview" id="icon-preview">
-                                <span class="placeholder-text">클릭하여 대표 이미지 선택</span>
-                            </div>
-                            <input type="file" id="icon-input" accept="image/*" hidden>
+                        <div class="panel-header-inline">
+                            <div class="panel-title">대표 이미지</div>
                             <button class="btn btn-delete btn-sm" id="btn-clear-icon"
                                 title="선택한 아이콘 이미지를 제거합니다">삭제</button>
                         </div>
+                        <div class="icon-preview" id="icon-preview">
+                            <span class="placeholder-text">클릭하여 대표 이미지 선택</span>
+                        </div>
+                        <input type="file" id="icon-input" accept="image/*" hidden>
                     </div>
                     <div class="image-section">
                         <div class="panel-header-inline">
@@ -242,7 +242,7 @@
                         <div class="control-row">
                             <label>캐릭터 이름:</label>
                             <input type="text" id="image-char-name" class="text-input"
-                                placeholder="캐릭터 영어 이름. (예: 인하 -> inha)">
+                                placeholder="캐릭터의 영어 이름 (예: 인하 -> inha)">
                             <button class="btn btn-primary" id="btn-convert-names" title="에셋 파일 이름을 RisuAI 형식으로 변환합니다">✨
                                 이름 변환</button>
                         </div>
@@ -262,7 +262,13 @@
 
         <!-- Bottom Actions -->
         <footer class="app-footer">
-            <button class="btn btn-secondary" id="btn-settings" title="API 키, 모델, 온도 설정">⚙️ 설정</button>
+            <div class="settings-btn-wrapper" id="settings-btn-wrapper">
+                <button class="btn btn-secondary" id="btn-settings" title="API 키, 모델, 온도 설정">⚙️ 설정</button>
+                <div class="api-key-tooltip" id="api-key-tooltip">
+                    <span class="tooltip-arrow">⬇</span>
+                    <span class="tooltip-text">API키가 설정되지 않았습니다. API키를 먼저 저장해주세요.</span>
+                </div>
+            </div>
             <button class="btn btn-secondary" id="btn-reset" title="모든 데이터를 초기화하고 페이지를 새로고침합니다">🔄 초기화</button>
             <button class="btn btn-secondary" id="btn-export" title="현재 작업 데이터를 JSON 파일로 내보냅니다">📤 내보내기</button>
             <button class="btn btn-secondary" id="btn-import" title="이전에 내보낸 JSON 파일을 불러옵니다">📥 가져오기</button>
