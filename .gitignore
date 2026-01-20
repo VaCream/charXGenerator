@@ -1,0 +1,11 @@
+# 모든 파일 제외
+*
+
+# 필수 폴더만 포함
+!docs/
+!docs/**
+
+# README 포함
+!README.md
+!.gitignore
+!.gitattributes

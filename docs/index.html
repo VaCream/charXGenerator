@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CharX Generator - RisuAI 캐릭터 변환 도구</title>
+    <meta name="description" content="AI 채팅 플랫폼 캐릭터를 RisuAI CharX 형식으로 변환하는 웹 도구">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <h1>CharX Generator</h1>
+            <p class="subtitle">RisuAI용 CharX 생성기</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <nav class="tab-nav">
+            <button class="tab-btn active" data-tab="character-info">
+                <span class="tab-icon">📝</span>
+                <span class="tab-label">캐릭터 정보</span>
+                <span class="tab-status" id="status-character-info"></span>
+            </button>
+            <button class="tab-btn" data-tab="first-message">
+                <span class="tab-icon">👋</span>
+                <span class="tab-label">퍼스트 메시지</span>
+                <span class="tab-status" id="status-first-message"></span>
+            </button>
+            <button class="tab-btn" data-tab="lorebook">
+                <span class="tab-icon">📖</span>
+                <span class="tab-label">로어북</span>
+                <span class="tab-status" id="status-lorebook"></span>
+            </button>
+            <button class="tab-btn" data-tab="status-window">
+                <span class="tab-icon">🪟</span>
+                <span class="tab-label">상태창</span>
+                <span class="tab-status" id="status-status-window"></span>
+            </button>
+            <button class="tab-btn" data-tab="image">
+                <span class="tab-icon">🖼️</span>
+                <span class="tab-label">이미지</span>
+                <span class="tab-status" id="status-image"></span>
+            </button>
+        </nav>
+
+        <!-- Tab Content -->
+        <main class="tab-content">
+            <!-- Character Info Tab -->
+            <section class="tab-panel active" id="panel-character-info">
+                <div class="panel-header">
+                    <div class="control-row">
+                        <label>캐릭터 시트:</label>
+                        <select id="sheet-select" class="select-input"></select>
+
+                        <label>캐릭터 이름:</label>
+                        <input type="text" id="char-name" class="text-input" placeholder="캐릭터의 이름을 입력해주세요">
+
+                        <button class="btn btn-primary" id="btn-generate-desc"
+                            title="왼쪽의 원본 데이터를 RisuAI 형식의 디스크립션으로 변환합니다">
+                            ✨ 디스크립션 생성
+                        </button>
+                    </div>
+                </div>
+                <div class="split-panel">
+                    <div class="panel-left">
+                        <div class="panel-title">캐릭터 설명</div>
+                        <p class="panel-hint">캐릭터의 정보를 입력해주세요.</p>
+                        <textarea id="source-text" class="textarea-large" placeholder="캐릭터의 설명, 설정, 성격 등
+어떤 정보나 형식이던지 상관 없습니다.
+다양한 내용을 자유롭게 입력해주세요.
+플랫폼(Babe, Caveduck, Crack 등)의 캐릭터 정보를 복사하여 붙여넣어도 됩니다."></textarea>
+                    </div>
+                    <div class="panel-right">
+                        <div class="panel-title">생성된 디스크립션</div>
+                        <p class="panel-hint">LLM이 생성한 RisuAI용 디스크립션이 표시됩니다.</p>
+                        <div class="textarea-wrapper" id="desc-result-wrapper">
+                            <textarea id="result-text" class="textarea-large" readonly></textarea>
+                        </div>
+                        <div class="panel-actions">
+                            <span class="save-status" id="char-save-status"></span>
+                            <button class="btn btn-secondary" id="btn-translate" title="영어 디스크립션을 한국어로 번역합니다">한국어
+                                번역</button>
+                            <span class="translate-status" id="char-translate-status"></span>
+                            <div class="spacer"></div>
+                            <button class="btn btn-secondary" id="btn-copy-desc" title="디스크립션을 클립보드에 복사합니다">복사</button>
+                            <button class="btn btn-primary" id="btn-save-char"
+                                title="캐릭터 이름과 디스크립션을 CharX 생성용으로 저장합니다">캐릭터 정보 저장</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- First Message Tab -->
+            <section class="tab-panel" id="panel-first-message">
+                <div class="first-message-container">
+                    <div class="message-nav">
+                        <div class="message-buttons" id="message-buttons"></div>
+                        <button class="btn btn-icon" id="btn-add-message" title="새 메시지 추가">+</button>
+                    </div>
+                    <div class="message-editor">
+                        <div class="panel-title">퍼스트 메시지 <span id="current-message-num">1</span></div>
+                        <textarea id="first-message-text" class="textarea-large" placeholder="이야기의 도입부를 적어주세요.
+사용자의 이름은 {{user}}라고 적어주면 됩니다.
+위쪽의 +버튼을 눌러서 도입부를 추가할 수 있습니다."></textarea>
+                        <div class="panel-actions">
+                            <span class="save-status" id="fm-save-status"></span>
+                            <button class="btn btn-delete btn-sm" id="btn-delete-message"
+                                title="현재 선택된 메시지를 삭제합니다">삭제</button>
+                            <div class="spacer"></div>
+                            <button class="btn btn-secondary" id="btn-copy-message"
+                                title="현재 메시지를 클립보드에 복사합니다">복사</button>
+                            <button class="btn btn-primary" id="btn-save-message"
+                                title="모든 퍼스트 메시지를 CharX 생성용으로 저장합니다">퍼스트 메시지 저장</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lorebook Tab -->
+            <section class="tab-panel" id="panel-lorebook">
+                <div class="split-panel">
+                    <div class="panel-left">
+                        <div class="panel-title">원본 로어북</div>
+                        <div class="lore-entries" id="source-lore-entries"></div>
+                        <div class="panel-actions">
+                            <button class="btn btn-secondary btn-add-lore" id="btn-add-lore"
+                                title="새로운 로어북 엔트리를 추가합니다">➕ 엔트리 추가</button>
+                            <div class="spacer"></div>
+                            <button class="btn btn-primary" id="btn-convert-lore"
+                                title="모든 로어북 엔트리를 영어로 변환하고 형식을 정리합니다">✨ 전체 변환</button>
+                        </div>
+                    </div>
+                    <div class="panel-right">
+                        <div class="panel-title">변환된 로어북</div>
+                        <div class="result-wrapper" id="lore-result-wrapper">
+                            <div class="lore-entries" id="result-lore-entries"></div>
+                        </div>
+                        <div class="panel-actions">
+                            <span class="save-status" id="lore-save-status"></span>
+                            <div class="spacer"></div>
+                            <button class="btn btn-primary" id="btn-save-lore" title="변환된 로어북을 CharX 생성용으로 저장합니다">로어북
+                                저장</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Status Window Tab -->
+            <section class="tab-panel" id="panel-status-window">
+                <div class="split-panel">
+                    <div class="panel-left">
+                        <div class="panel-title">상태창 설정</div>
+                        <p class="panel-hint">원하는 상태창 스타일을 설명해주세요.</p>
+                        <textarea id="status-source" class="textarea-medium" placeholder="원하는 상태창의 구성 요소를 입력해주세요. 
+특별히 원하는 스타일이나 디테일이 있다면 그것도 좋습니다.
+기존에 사용하던 상태창 지침이 있다면 그것을 넣어도 됩니다.
+
+예시:
+날짜, 시간, 날씨, 장소 
+{{char}}의 복장, {{char}}의 기분, {{char}}의 속마음
+날씨와 {{char}}의 기분은 이모지를 사용해 표현해주세요."></textarea>
+                        <div class="panel-actions">
+                            <button class="btn btn-primary" id="btn-generate-status"
+                                title="입력한 요구사항을 바탕으로 상태창 HTML/CSS와 지침을 생성합니다">✨ 상태창 생성</button>
+                            <button class="btn btn-secondary" id="btn-preview-status"
+                                title="생성된 상태창을 미리보기합니다">미리보기</button>
+                        </div>
+                        <!-- 인라인 미리보기 -->
+                        <div class="status-preview-container" id="status-preview-container">
+                            <div class="preview-frame-inline" id="preview-frame-inline"></div>
+                        </div>
+                    </div>
+                    <div class="panel-right">
+                        <div class="panel-title">생성 결과</div>
+                        <div class="result-wrapper" id="status-result-wrapper">
+                            <div class="status-results">
+                                <div class="result-section">
+                                    <label>지침 (Instruction)</label>
+                                    <textarea id="status-instruction" class="textarea-small" readonly></textarea>
+                                    <div class="result-actions">
+                                        <button class="btn btn-secondary btn-sm"
+                                            id="btn-translate-instruction">번역</button>
+                                        <button class="btn btn-secondary btn-sm" id="btn-copy-instruction">복사</button>
+                                    </div>
+                                </div>
+                                <div class="result-section">
+                                    <label>정규식 IN</label>
+                                    <textarea id="status-regex-in" class="textarea-small" readonly></textarea>
+                                    <button class="btn btn-secondary btn-sm" id="btn-copy-regex-in">복사</button>
+                                </div>
+                                <div class="result-section">
+                                    <label>CSS 스타일</label>
+                                    <textarea id="status-style" class="textarea-small" readonly></textarea>
+                                    <button class="btn btn-secondary btn-sm" id="btn-copy-style">복사</button>
+                                </div>
+                                <div class="result-section">
+                                    <label>HTML 템플릿</label>
+                                    <textarea id="status-html" class="textarea-small" readonly></textarea>
+                                    <button class="btn btn-secondary btn-sm" id="btn-copy-html">복사</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-actions">
+                            <span class="save-status" id="status-save-status"></span>
+                            <div class="spacer"></div>
+                            <button class="btn btn-primary" id="btn-save-status"
+                                title="상태창 지침과 정규식을 CharX 생성용으로 저장합니다">상태창 저장</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Image Tab -->
+            <section class="tab-panel" id="panel-image">
+                <div class="image-container">
+                    <div class="image-section">
+                        <div class="panel-title">대표 이미지</div>
+                        <div class="icon-area">
+                            <div class="icon-preview" id="icon-preview">
+                                <span class="placeholder-text">클릭하여 대표 이미지 선택</span>
+                            </div>
+                            <input type="file" id="icon-input" accept="image/*" hidden>
+                            <button class="btn btn-delete btn-sm" id="btn-clear-icon"
+                                title="선택한 아이콘 이미지를 제거합니다">삭제</button>
+                        </div>
+                    </div>
+                    <div class="image-section">
+                        <div class="panel-header-inline">
+                            <div class="panel-title">추가 이미지(에셋)</div>
+                            <button class="btn btn-icon" id="btn-add-assets" title="에셋 추가">+</button>
+                            <button class="btn btn-delete btn-sm" id="btn-clear-assets" title="모든 에셋 이미지를 제거합니다">전체
+                                삭제</button>
+                        </div>
+                        <input type="file" id="assets-input" accept="image/*" multiple hidden>
+                        <div class="asset-grid" id="asset-grid"></div>
+                    </div>
+                    <div class="image-section">
+                        <div class="panel-title">이미지 이름 변환 결과</div>
+                        <div class="control-row">
+                            <label>캐릭터 이름:</label>
+                            <input type="text" id="image-char-name" class="text-input"
+                                placeholder="캐릭터 영어 이름. (예: 인하 -> inha)">
+                            <button class="btn btn-primary" id="btn-convert-names" title="에셋 파일 이름을 RisuAI 형식으로 변환합니다">✨
+                                이름 변환</button>
+                        </div>
+                        <div class="result-wrapper" id="image-result-wrapper">
+                            <div class="converted-names-large" id="converted-names"></div>
+                        </div>
+                    </div>
+                    <div class="panel-actions">
+                        <span class="save-status" id="image-save-status"></span>
+                        <div class="spacer"></div>
+                        <button class="btn btn-primary" id="btn-save-image" title="아이콘과 에셋 이미지를 CharX 생성용으로 저장합니다">이미지
+                            저장</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Actions -->
+        <footer class="app-footer">
+            <button class="btn btn-secondary" id="btn-settings" title="API 키, 모델, 온도 설정">⚙️ 설정</button>
+            <button class="btn btn-secondary" id="btn-reset" title="모든 데이터를 초기화하고 페이지를 새로고침합니다">🔄 초기화</button>
+            <button class="btn btn-secondary" id="btn-export" title="현재 작업 데이터를 JSON 파일로 내보냅니다">📤 내보내기</button>
+            <button class="btn btn-secondary" id="btn-import" title="이전에 내보낸 JSON 파일을 불러옵니다">📥 가져오기</button>
+            <input type="file" id="import-file" accept=".json" hidden>
+            <div class="spacer"></div>
+            <button class="btn btn-accent btn-large" id="btn-generate-charx">
+                💾 CharX 저장
+            </button>
+        </footer>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settings-modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>설정</h2>
+                <button class="btn btn-icon modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="api-key">Gemini API Key</label>
+                    <input type="password" id="api-key" class="text-input" placeholder="API 키를 입력하세요">
+                    <p class="form-hint">
+                        <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a>에서 API 키를 발급받을
+                        수 있습니다.
+                    </p>
+                </div>
+                <div class="form-group">
+                    <label for="model-select">모델</label>
+                    <select id="model-select" class="select-input">
+                        <option value="gemini-3-pro-preview">Gemini 3 Pro (Preview)</option>
+                        <option value="gemini-3-flash-preview">Gemini 3 Flash (Preview)</option>
+                        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                        <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="temperature-slider">온도 (Temperature): <span id="temperature-value">1.0</span></label>
+                    <input type="range" id="temperature-slider" class="range-input" min="0" max="2" step="0.1"
+                        value="1.0">
+                    <p class="form-hint">
+                        <span id="temperature-recommendation">권장: 1.0</span> · 낮을수록 일관된 응답, 높을수록 창의적인 응답
+                    </p>
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-secondary" id="btn-test-api">연결 테스트</button>
+                    <span class="test-result" id="api-test-result"></span>
+                </div>
+                <div class="form-group">
+                    <label class="toggle-label">
+                        <span>초보자 가이드</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="guide-toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </label>
+                    <p class="form-hint">어떤 버튼과 필드를 사용해야 하는지 주황색 테두리로 안내합니다.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="btn-save-settings">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div class="modal" id="preview-modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>상태창 미리보기</h2>
+                <button class="btn btn-icon modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="preview-frame" id="preview-frame"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="lib/jszip.min.js"></script>
+    <script type="module" src="js/main.js"></script>
+</body>
+
+</html>

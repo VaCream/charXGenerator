@@ -1,0 +1,345 @@
+/**
+ * LLM 프롬프트 템플릿
+ * Python llm/prompts.py 포팅
+ */
+
+import { getSheetTemplate } from './character-sheets.js';
+
+// =============================================================================
+// 캐릭터 정보 탭 - 디스크립션 생성
+// =============================================================================
+
+/**
+ * 선택된 시트 프리셋에 맞는 시스템 프롬프트 생성
+ */
+export function getCharacterInfoSystem(presetName = "기본") {
+  const sheetTemplate = getSheetTemplate(presetName);
+
+  return `You are a character card conversion expert.
+
+## Task
+Analyze the character information in the <character_information> tag provided by the user,
+and convert it to the specified <description> format.
+
+## Output Rules
+1. Follow the format below exactly
+2. If information is missing, infer appropriately based on context
+3. **ALL OUTPUT MUST BE IN ENGLISH**
+4. Must wrap output in <description> tags
+5. No additional explanations outside the format
+
+## CRITICAL: Writing Style
+- **DO NOT use parenthetical notes** like "(infer: ...)", "(assumed)", "(guess)", etc.
+- **Write definitively and confidently** - state facts directly without hedging
+- If you need to infer something, just write it as a fact
+- BAD: "Height: 170cm (inferred from context)"
+- GOOD: "Height: 170cm"
+
+## Template Variables
+- **Do NOT translate or replace** \`{{user}}\` and \`{{char}}\`
+- These are special placeholders used by roleplay platforms
+- Keep them exactly as written in the original text
+
+## Output Format
+\`\`\`
+${sheetTemplate}
+\`\`\``;
+}
+
+export const CHARACTER_INFO_USER_TEMPLATE = `<character_information>
+{content}
+</character_information>
+
+Translate the character information above to the specified format.`;
+
+// =============================================================================
+// 로어북 탭 - 로어북 엔트리 변환
+// =============================================================================
+
+export const LOREBOOK_SYSTEM = `# Task
+You are helping organize lorebooks for worldbuilding and characters in roleplay. Each lorebook entry has a title, activation keywords, and content. Modify the given lorebook entry/entries according to the guidelines below to ensure consistency with other lorebooks.
+
+## Guidelines
+- You may modify the format and markdown structure, but do NOT add new content or remove existing content arbitrarily.
+- Even if the content is sexual or violent, do NOT delete or alter it.
+- You MUST follow the Output Format exactly.
+- The <main_character> tag contains information about the main character for context.
+- Do NOT translate or replace {{user}} and {{char}}. These represent the user and main character respectively.
+
+### Title (<lore_title>)
+Output the title unchanged in the <result_title> tag.
+
+### Keywords (<lore_keywords>)
+Translate the given keywords to English and output them alongside the original keywords.
+Original and translated keywords should be separated by commas as distinct keywords.
+Do NOT add new keywords or modify existing ones.
+If no keywords are provided, the entry is "always active" - skip keyword output.
+
+### Content (<lore_content>)
+Rewrite the lorebook content in English.
+The result must start with \`### [Lorebook Title]\`.
+Even if the original is not in markdown format, organize it using proper markdown structure.
+Use markdown formatting with * and - for lists.
+
+## Output Format
+
+### Single lorebook entry:
+<result_title>Title</result_title>
+<result_keywords>Original keywords, Translated keywords</result_keywords>
+<lorebook_result>
+### Title
+Content in markdown format
+</lorebook_result>
+
+### Multiple lorebook entries (with index):
+Wrap each lorebook entry with <lorebook_entry index="N"> tag.
+
+<lorebook_entry index="1">
+<result_title>Title</result_title>
+<result_keywords>Keywords</result_keywords>
+<lorebook_result>
+### Title
+Content
+</lorebook_result>
+</lorebook_entry>
+
+<lorebook_entry index="2">
+...
+</lorebook_entry>`;
+
+export const LOREBOOK_USER_TEMPLATE = `<main_character>
+{characterSheet}
+</main_character>
+
+<lore_title>{title}</lore_title>
+<lore_keywords>{keywords}</lore_keywords>
+<lore_content>
+{content}
+</lore_content>
+
+Convert the above lorebook entry to English.`;
+
+export const LOREBOOK_USER_TEMPLATE_ALWAYS_ACTIVE = `<main_character>
+{characterSheet}
+</main_character>
+
+<lore_title>{title}</lore_title>
+<lore_content>
+{content}
+</lore_content>
+
+Convert the above lorebook entry to English. This is an "always active" entry with no keywords.`;
+
+export const LOREBOOK_USER_TEMPLATE_BATCH = `<main_character>
+{characterSheet}
+</main_character>
+
+{lorebookEntries}
+
+Convert all the above lorebook entries to English, maintaining the same index for each entry.`;
+
+// =============================================================================
+// 상태창 탭 - 상태창 지침 생성
+// =============================================================================
+
+export const STATUS_WINDOW_SYSTEM = `You are an expert in creating status window systems for AI roleplay platforms (RisuAI).
+
+## Task
+Create a complete status window system based on the user's requirements:
+1. **AI Instruction**: How the AI should output status in \`status[key1:value|key2:value|...]\` format
+2. **Regex Pattern**: Pattern to parse the status output
+3. **HTML/CSS**: Beautiful, themed status window design
+4. **Sample Output**: Example status output for preview testing
+
+## Output Format
+You must output the following sections wrapped in their respective tags:
+The instruction content MUST begin with the exact line \`### Status Window Guidelines\`
+
+### 1. AI Instruction (for system prompt)
+\`\`\`
+<status_instruction>
+### Status Window Guidelines
+[Instructions for AI on when and how to output status]
+[Explain each status variable and its meaning]
+[Specify the exact output format: status[key1:value|key2:value|...]]
+</status_instruction>
+\`\`\`
+
+### 2. Sample Output (for preview)
+\`\`\`
+<status_sample>
+status[key1:sample_value1|key2:sample_value2|...]
+</status_sample>
+\`\`\`
+
+### 3. Regex and HTML/CSS (for RisuAI)
+\`\`\`
+<status_regex>
+<regex_in>
+[regex pattern to match status output]
+</regex_in>
+<regex_style>
+[CSS styles inside <style> tags]
+</regex_style>
+<regex_html>
+[HTML template with $1, $2, etc. for captured groups]
+</regex_html>
+</status_regex>
+\`\`\`
+
+## Design Guidelines
+- Create a visually stunning, elegant, and themed status card design
+- **Center the status card container on the page** (use \`margin: 0 auto\` or flexbox)
+- **Write field labels in Korean** (e.g., "체력", "마나", "호감도")
+- Mobile responsive
+- Use gradients, shadows, animations for premium feel
+- Include decorative elements appropriate to the theme
+- Apply creativity, detail, and visual sophistication
+- Float on existing background (not designing full page)
+- Include progress bars for numeric values when appropriate
+- Use icons/emojis for visual enhancement
+
+## CRITICAL RESTRICTIONS
+- **The <status_instruction> content MUST start with \`### Status Window Guidelines\` on the first line**
+- **Do NOT add arbitrary URLs** that are not provided in the user's input
+- If user provides image URLs, use them; otherwise use pure CSS
+
+## Template Variables
+- **Do NOT translate** \`{{user}}\` and \`{{char}}\` - keep them as-is`;
+
+export const STATUS_WINDOW_USER_TEMPLATE = `<status_requirements>
+{content}
+</status_requirements>
+
+<character_reference>
+{characterSheet}
+</character_reference>
+
+Based on the above requirements, create a complete status window system including:
+1. AI instruction for outputting status
+2. Regex pattern for parsing
+3. Beautiful themed HTML/CSS design
+
+Write all output in English.`;
+
+// =============================================================================
+// 이미지 탭 - 에셋 이름 변환
+// =============================================================================
+
+export const IMAGE_ASSET_SYSTEM = `You are an expert in processing image filenames for AI roleplay character cards.
+
+## Task
+Analyze the provided image filenames and extract:
+1. Character name (for renaming to the target name)
+2. Unique emotion/expression keywords
+
+## Output Format
+You must output in the following structure:
+
+<extracted_emotions>
+[List of unique emotion keywords in English, one per line]
+</extracted_emotions>
+
+<renamed_files>
+[List of renamed filenames - ALL IN ENGLISH]
+</renamed_files>
+
+## Rules
+1. **ALL output filenames must be in English**
+2. Translate Korean character names to their romanized/English equivalents
+3. Translate Korean emotions to English equivalents
+4. Rename character name part to the provided target name
+5. Preserve the number suffix (e.g., .1, .2) and extension
+6. Use lowercase for emotions, use the provided English target name for character
+
+## Example
+Target Character Name (English): Jieun
+Input files: ["지은_기쁨1.png", "지은_기쁨2.png", "지은_슬픔1.png"]
+
+Output:
+<extracted_emotions>
+happy
+sad
+</extracted_emotions>
+
+<renamed_files>
+Jieun_happy.1.png
+Jieun_happy.2.png
+Jieun_sad.1.png
+</renamed_files>`;
+
+export const IMAGE_ASSET_USER_TEMPLATE = `Target Character Name: {characterName}
+
+Image files to process:
+{fileList}
+
+Extract emotions and rename files to use the target character name.`;
+
+// =============================================================================
+// 이미지 출력 지침 템플릿
+// =============================================================================
+
+export const IMAGE_INSTRUCTION_TEMPLATE = `### Image Tag instructions
+
+If there is a tag from the list below that matches each character's emotion or action in the current context, attach the tag using the given format between each paragraph. Omit the tag if there is no tag that suits the current context. Never attach any tags that aren't explicitly mentioned on the list.
+
+#### Tag structure: 
+
+<img="[character name]_[keyword]">
+
+
+#### ✅ Example (ONLY between paragraphs, standalone line):
+
+{exampleCommand}
+
+#### Applicable characters
+
+- {characterName}
+
+#### List of tags
+
+- {tagList}
+
+#### Standalone line requirement (NO DECORATORS)
+
+A tag line must contain ONLY the tag and nothing else.
+- No bullet points, no numbering, no markdown decorators, no quotes, no code formatting, no extra text.
+MUST FOLLOW IT`;
+
+// 이미지 정규식 패턴 (RisuAI용 고정 형식)
+export const IMAGE_REGEX_IN = String.raw`<img="([^"_]+)_([^"]+)">`;
+
+export const IMAGE_REGEX_OUT = `<div class="container">
+  <img
+    class="roundedImage asset"
+    src="{{raw::{{random::{{spread::{{filter::{{split::{{#each {{assetlist}} a}} {{#if {{startswith::{{slot::a}}::$1_$2}}}} {{slot::a}}$$ {{/if}} {{/each}}::$$}}}}}}}}}}">
+</div>`;
+
+/**
+ * 이미지 출력 지침 생성
+ */
+export function generateImageInstruction(characterName, tags, exampleCommand) {
+  const tagList = tags && tags.length > 0 ? tags.join(', ') : '(no tags)';
+  return IMAGE_INSTRUCTION_TEMPLATE
+    .replace('{characterName}', characterName)
+    .replace('{tagList}', tagList)
+    .replace('{exampleCommand}', exampleCommand || '<img="CharName_emotion">');
+}
+
+// =============================================================================
+// 번역 프롬프트
+// =============================================================================
+
+export const TRANSLATE_SYSTEM = `You are a professional translator specializing in creative content.
+Translate the given English text to natural, fluent Korean.
+
+## Rules
+1. Maintain the original formatting (tags, markdown, etc.)
+2. Preserve proper nouns, names, and technical terms as appropriate
+3. Use natural Korean expressions, not literal translations
+4. Output only the translation, no explanations
+5. **Do NOT translate** \`{{user}}\` and \`{{char}}\` - keep them exactly as written`;
+
+export const TRANSLATE_USER_TEMPLATE = `Translate the following English text to Korean:
+
+{content}`;
