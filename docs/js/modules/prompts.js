@@ -227,7 +227,6 @@ status\\[([^\\|]+)\\|([^\\|]+)\\|...\\]
 
 ## Design Guidelines
 - Create a sleek, themed status card design
-- Center the status card on the page (use \`margin: 0 auto\` or flexbox)
 - Write field labels in Korean (e.g., "체력", "마나", "호감도")
 - Mobile responsive
 - Use gradients, shadows, and animations for a premium feel
